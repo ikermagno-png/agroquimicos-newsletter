@@ -1,0 +1,78 @@
+name: Newsletter AgroQuímicos Brasil
+
+on:
+  schedule:
+    # Executa todo dia às 15:00 UTC (12:00 horário de Brasília)
+    # Formato cron: minuto hora dia-do-mês mês dia-da-semana
+    - cron: '0 15 * * *'
+
+  # Permite execução manual para testes
+  workflow_dispatch:
+
+jobs:
+  newsletter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Executar scraper e enviar newsletter
+        env:
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          SMTP_PROVIDER: ${{ secrets.SMTP_PROVIDER }}
+        run: |
+          python main.py
+
+      - name: Salvar logs
+        if: always()
+        run: |
+          # Cria diretório de logs se não existir
+          mkdir -p logs
+
+          # Move logs gerados para a pasta logs
+          if ls *.json 1> /dev/null 2>&1; then
+            mv *.json logs/ 2>/dev/null || true
+          fi
+
+          # Lista logs para verificação
+          echo "Logs gerados:"
+          ls -la logs/ || echo "Nenhum log encontrado"
+
+      - name: Commit e push dos logs
+        if: always()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Adiciona novos logs
+          git add logs/ 2>/dev/null || true
+
+          # Commit apenas se houver mudanças
+          if git diff --staged --quiet; then
+            echo "Nenhum log novo para commitar"
+          else
+            git commit -m "Atualizar logs - $(date '+%d/%m/%Y %H:%M:%S')"
+            git push
+          fi
+
+      - name: Upload HTML como artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-html
+          path: logs/*.json
+          retention-days: 30
