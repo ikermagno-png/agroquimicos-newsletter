@@ -4,6 +4,7 @@ Orquestra: scraping -> geração HTML -> envio de e-mail -> salvamento de log
 """
 
 import os
+import sys
 import json
 from datetime import datetime
 from scraper import run_scraper
@@ -131,6 +132,8 @@ def main():
 
     # Passo 3: Envia e-mail
     print("\n[3/4] Enviando e-mail...")
+    email_sent = False
+
     try:
         # Obtém configuração SMTP
         from send_email import get_smtp_config
@@ -138,7 +141,7 @@ def main():
 
         print(f"Usando servidor SMTP: {smtp_config['server']}")
 
-        success = send_newsletter_email(
+        email_sent = send_newsletter_email(
             html_content=html_content,
             plain_text_content=plain_text_content,
             recipient_email=recipient_email,
@@ -148,7 +151,7 @@ def main():
             smtp_port=smtp_config['port']
         )
 
-        if success:
+        if email_sent:
             print("✓ E-mail enviado com sucesso!")
         else:
             print("✗ Falha ao enviar e-mail")
@@ -182,8 +185,8 @@ def main():
     print("✓ Execução concluída!")
     print("=" * 60)
 
-    return True
+    return email_sent
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(0 if main() else 1)
