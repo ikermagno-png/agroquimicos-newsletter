@@ -92,6 +92,7 @@ def main():
     sender_email = os.environ.get('SENDER_EMAIL')
     sender_password = os.environ.get('SENDER_PASSWORD')
     recipient_email = os.environ.get('RECIPIENT_EMAIL')
+    smtp_username = os.environ.get('SMTP_USERNAME')
 
     if not all([sender_email, sender_password, recipient_email]):
         print("\n⚠ ERRO: Variáveis de ambiente não configuradas!")
@@ -147,6 +148,7 @@ def main():
             recipient_email=recipient_email,
             sender_email=sender_email,
             sender_password=sender_password,
+            smtp_username=smtp_username,
             smtp_server=smtp_config['server'],
             smtp_port=smtp_config['port']
         )
