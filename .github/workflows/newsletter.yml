@@ -9,6 +9,9 @@ on:
   # Permite execução manual para testes
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   newsletter:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
         run: |
           python main.py
 
-      - name: Salvar logs
+      - name: Salvar logs e criar artifact
         if: always()
         run: |
           # Cria diretório de logs se não existir
@@ -52,27 +55,13 @@ jobs:
           echo "Logs gerados:"
           ls -la logs/ || echo "Nenhum log encontrado"
 
-      - name: Commit e push dos logs
-        if: always()
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-          # Adiciona novos logs
-          git add logs/ 2>/dev/null || true
-
-          # Commit apenas se houver mudanças
-          if git diff --staged --quiet; then
-            echo "Nenhum log novo para commitar"
-          else
-            git commit -m "Atualizar logs - $(date '+%d/%m/%Y %H:%M:%S')"
-            git push
-          fi
-
-      - name: Upload HTML como artifact
+      - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: newsletter-html
-          path: logs/*.json
+          name: newsletter-logs
+          path: |
+            logs/*.json
+            *.json
           retention-days: 30
+          if-no-files-found: warn
