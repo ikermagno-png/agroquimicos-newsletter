@@ -33,6 +33,7 @@ jobs:
 
       - name: Executar scraper e enviar newsletter
         env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}

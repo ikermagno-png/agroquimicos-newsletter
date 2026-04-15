@@ -411,6 +411,13 @@ def generate_newsletter_html(news_data, date=None):
 def generate_executive_summary(news_data, segmentos_com_news):
     """Gera resumo executivo em bullet points"""
     resumo_items = []
+    total = sum(len(news_data.get(k, [])) for k in news_data)
+
+    if total == 0:
+        return (
+            "<li><strong>Nenhuma notícia relevante encontrada</strong> nas fontes monitoradas nesta execução.</li>\n"
+            "<li>O monitoramento segue ativo e uma nova coleta ocorrerá na próxima execução.</li>"
+        )
 
     # Destaque para registros do MAPA
     if 'registro_oficial' in news_data and news_data['registro_oficial']:
@@ -421,7 +428,7 @@ def generate_executive_summary(news_data, segmentos_com_news):
     segment_counts = []
     for key, info, noticias in segmentos_com_news:
         if key != 'registro_oficial' and key != 'geral' and noticias:
-            segment_counts.append(f"<li>{len(noticias)} notícias sobre <strong>{info.titulo.lower()}</strong></li>")
+            segment_counts.append(f"<li>{len(noticias)} notícias sobre <strong>{info['titulo'].lower()}</strong></li>")
 
     # Adiciona até 5 segmentos
     resumo_items.extend(segment_counts[:5])
@@ -431,7 +438,6 @@ def generate_executive_summary(news_data, segmentos_com_news):
         resumo_items.append(f"<li>{len(news_data['geral'])} notícias gerais do setor</li>")
 
     # Total
-    total = sum(len(news_data.get(k, [])) for k in news_data)
     resumo_items.append(f"<li><strong>Total: {total} notícias</strong> de {len(set(n['fonte'] for segment in news_data.values() for n in segment))} fontes diferentes</li>")
 
     return '\n'.join(resumo_items)

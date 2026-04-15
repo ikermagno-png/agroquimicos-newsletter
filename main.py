@@ -118,8 +118,7 @@ def main():
 
     # Verifica se há notícias
     if total_news == 0:
-        print("⚠ Nenhuma notícia coletada. Abortando.")
-        return False
+        print("⚠ Nenhuma notícia relevante foi coletada. A newsletter será gerada mesmo assim.")
 
     # Passo 2: Gera HTML da newsletter
     print("\n[2/4] Gerando HTML da newsletter...")
